@@ -1,0 +1,19 @@
+{
+  "request": {
+    "slice": [
+      {
+        "origin": "LAX",
+        "destination": "SFO",
+        "date": "2016-10-10"
+      }
+    ],
+    "passengers": {
+      "adultCount": 1
+    },
+    "solutions": 20,
+    "refundable": false
+  }
+}
+
+//run this in the terminal to see results
+curl -d @request.json --header "Content-Type: application/json" https://www.googleapis.com/qpxExpress/v1/trips/search?key=AIzaSyDXJhgkBvhEPy7e2lVrnjziqf3KFbQ2jHs
