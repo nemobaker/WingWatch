@@ -1,30 +1,74 @@
-// modules =================================================
-var express        = require('express');
-var app            = express();
-var mongoose       = require('mongoose');
-var bodyParser     = require('body-parser');
-var methodOverride = require('method-override');
+var bodyParser = require('body-parser');
+var express = require('express');
+var mongoose = require('mongoose');
+var request = require('request');
+var $ = require("jquery");
+var app = express(); //we can use functions from express module!!
+//connect to mongo db named myFlights
+mongoose.connect('mongodb://localhost/myFlights');
 
-// configuration ===========================================
-	
-// config files
-var db = require('./config/db');
+var db = mongoose.connection;
 
-var port = process.env.PORT || 8080; // set our port
-// mongoose.connect(db.url); // connect to our mongoDB database (commented out after you enter in your own credentials)
+var myFlightsSchema = mongoose.Schema({
+    departure: String,
+    arrival: String,
+    date: String,
+    price: String
+});
+			
+var Flights = mongoose.model('Flights', myFlightsSchema);
 
-// get all data/stuff of the body (POST) parameters
-app.use(bodyParser.json()); // parse application/json 
-app.use(bodyParser.json({ type: 'application/vnd.api+json' })); // parse application/vnd.api+json as json
-app.use(bodyParser.urlencoded({ extended: true })); // parse application/x-www-form-urlencoded
+db.on('error', console.error.bind(console, 'connection error:'));
 
-app.use(methodOverride('X-HTTP-Method-Override')); // override with the X-HTTP-Method-Override header in the request. simulate DELETE/PUT
-app.use(express.static(__dirname + '/public')); // set the static files location /public/img will be /img for users
+db.once('open', function() {
 
-// routes ==================================================
-require('./app/routes')(app); // pass our application into our routes
+	app.use(express.static(__dirname + '/public'));
+		//look for static files (html/js/image)
+		//look in the public folder
+	app.use(bodyParser.json());
 
-// start app ===============================================
-app.listen(port);	
-console.log('Magic happens on port ' + port); 			// shoutout to the user
-exports = module.exports = app; 						// expose app
+	app.get('/myFlights', function(req,res){
+		// console.log('~~~~~I received a GET request~~~~~~');
+		Flights.find(function (err, flights) {
+			if (err) return console.error('TRY AGAIN WHOMP!',err);
+			// console.log('here are the flights buddy boy',flights);
+			res.json(flights);
+		});
+	});
+
+	app.post('/myFlights', function(req,res){
+		// console.log('~~~~~I received a POST request~~~~~~');
+		// console.log(req.body);
+		db.collection('flights').insert(req.body);
+	});
+
+
+	app.delete('/myFlights/:id', function (req, res) {
+		var id = req.params.id
+		//console.log('ID TO DELETE', id);
+		//db.collection('flights').find({_id: req.params.id}).remove().exec();
+
+		//idToDelete = JSON.stringify(req.params.id);
+		console.log('***********************', id);
+		var idToDelete = 'ObjectId'
+
+		Flights.find({
+			"_id": id
+		}).remove(function(err){
+			if(err){
+				console.log(err);
+			} else {
+				console.log('success!');
+				res.end();
+			}
+		});
+
+
+
+
+	});
+
+});
+
+app.listen(3000);
+console.log('server running on port 3000, the trillest port');
