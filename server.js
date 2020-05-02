@@ -28,7 +28,6 @@ db.once('open', function() {
 	app.use(bodyParser.json());
 
 	app.get('/myFlights', function(req,res){
-		// console.log('~~~~~I received a GET request~~~~~~');
 		Flights.find(function (err, flights) {
 			if (err) return console.error('TRY AGAIN WHOMP!',err);
 			// console.log('here are the flights buddy boy',flights);
@@ -37,19 +36,12 @@ db.once('open', function() {
 	});
 
 	app.post('/myFlights', function(req,res){
-		// console.log('~~~~~I received a POST request~~~~~~');
-		// console.log(req.body);
 		db.collection('flights').insert(req.body);
 	});
 
 
 	app.delete('/myFlights/:id', function (req, res) {
 		var id = req.params.id
-		//console.log('ID TO DELETE', id);
-		//db.collection('flights').find({_id: req.params.id}).remove().exec();
-
-		//idToDelete = JSON.stringify(req.params.id);
-		console.log('***********************', id);
 		var idToDelete = 'ObjectId'
 
 		Flights.find({
@@ -71,4 +63,4 @@ db.once('open', function() {
 });
 
 app.listen(3000);
-console.log('server running on port 3000, the trillest port');
+console.log('server running on port 3000');
